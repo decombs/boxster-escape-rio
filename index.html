@@ -24,30 +24,30 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(0,0,0,0.85);
+    background: rgba(0,0,0,0.88);
     z-index: 10;
     color: white;
     text-align: center;
     padding: 20px;
   }
   #startScreen h1 {
-    font-size: 28px;
-    margin-bottom: 10px;
+    font-size: 32px;
+    margin-bottom: 8px;
     text-shadow: 0 0 20px #FFD700;
     color: #FFD700;
   }
   #startScreen h2 {
     font-size: 16px;
     color: #aaa;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     font-weight: normal;
   }
   .btn {
     background: linear-gradient(135deg, #FFD700, #FFA500);
     color: #000;
     border: none;
-    padding: 15px 50px;
-    font-size: 22px;
+    padding: 16px 55px;
+    font-size: 24px;
     font-weight: bold;
     border-radius: 50px;
     cursor: pointer;
@@ -57,15 +57,25 @@
   }
   .btn:hover { transform: scale(1.05); }
   #gameOverScreen h1 { font-size: 32px; color: #ff4444; margin-bottom: 10px; }
-  #gameOverScreen .score { font-size: 24px; color: #FFD700; margin: 15px 0; }
+  #gameOverScreen .score { font-size: 26px; color: #FFD700; margin: 15px 0; }
   #obstacleList {
     text-align: left;
-    margin: 15px 0;
-    font-size: 13px;
-    color: #ccc;
-    line-height: 1.8;
+    margin: 15px auto;
+    font-size: 15px;
+    color: #ddd;
+    line-height: 2.2;
   }
-  #obstacleList span { font-size: 18px; }
+  #obstacleList span { font-size: 22px; margin-right: 6px; }
+  .face-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #FFD700;
+    margin: 10px auto;
+    overflow: hidden;
+    background: #333;
+  }
+  .face-preview img { width: 100%; height: 100%; object-fit: cover; }
 </style>
 </head>
 <body>
@@ -74,15 +84,15 @@
   <h1>🏎️ BOXSTER ESCAPE 🏎️</h1>
   <h2>Rio de Janeiro Edition</h2>
   <div id="obstacleList">
-    <span>🧔</span> Dodge Lula<br>
-    <span>💰</span> Dodge Taxes (IPVA, IR, ICMS...)<br>
-    <span>👔</span> Dodge Haddad<br>
-    <span>🏛️</span> Dodge Bad Governance<br>
-    <span>😴</span> Dodge Sleep Deprivation<br>
-    <span>🎾</span> Dodge Your Bad Forehand<br>
+    <span>🧔</span> Lula<br>
+    <span>💰</span> Impostos (IPVA, IR, ICMS...)<br>
+    <span>👔</span> Haddad<br>
+    <span>🏛️</span> Má Gestão<br>
+    <span>😴</span> Sono<br>
+    <span>🎾</span> Forehand Ruim<br>
   </div>
   <button class="btn" id="startBtn">ACELERA! 🚗💨</button>
-  <p style="color:#666; margin-top:15px; font-size:12px;">Swipe or tap left/right to steer</p>
+  <p style="color:#666; margin-top:15px; font-size:12px;">Arraste ou toque para desviar</p>
 </div>
 
 <div id="gameOverScreen" style="display:none;">
@@ -98,6 +108,111 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
+// Load driver face image
+const faceImg = new Image();
+let faceLoaded = false;
+// We'll draw the face from the provided photo - using an offscreen canvas to create it
+const faceCanvas = document.createElement('canvas');
+faceCanvas.width = 100;
+faceCanvas.height = 100;
+const faceCtx = faceCanvas.getContext('2d');
+
+function createDriverFace() {
+  const fc = faceCtx;
+  const cx = 50, cy = 50;
+  // Background circle
+  fc.fillStyle = '#F4C28B';
+  fc.beginPath();
+  fc.arc(cx, cy, 45, 0, Math.PI * 2);
+  fc.fill();
+  // Hair - dark brown, short
+  fc.fillStyle = '#2A1810';
+  fc.beginPath();
+  fc.ellipse(cx, cy - 18, 42, 32, 0, Math.PI, Math.PI * 2);
+  fc.fill();
+  // More hair volume on sides
+  fc.fillRect(10, 18, 12, 20);
+  fc.fillRect(78, 18, 12, 20);
+  // Forehead
+  fc.fillStyle = '#F4C28B';
+  fc.beginPath();
+  fc.ellipse(cx, cy - 8, 36, 18, 0, 0, Math.PI);
+  fc.fill();
+  // Eyebrows
+  fc.strokeStyle = '#2A1810';
+  fc.lineWidth = 3;
+  fc.beginPath();
+  fc.moveTo(25, 32);
+  fc.quadraticCurveTo(33, 28, 42, 32);
+  fc.stroke();
+  fc.beginPath();
+  fc.moveTo(58, 32);
+  fc.quadraticCurveTo(67, 28, 75, 32);
+  fc.stroke();
+  // Eyes
+  fc.fillStyle = '#fff';
+  fc.beginPath();
+  fc.ellipse(34, 40, 9, 7, 0, 0, Math.PI * 2);
+  fc.fill();
+  fc.beginPath();
+  fc.ellipse(66, 40, 9, 7, 0, 0, Math.PI * 2);
+  fc.fill();
+  // Pupils
+  fc.fillStyle = '#3A2510';
+  fc.beginPath();
+  fc.arc(35, 40, 4.5, 0, Math.PI * 2);
+  fc.fill();
+  fc.beginPath();
+  fc.arc(67, 40, 4.5, 0, Math.PI * 2);
+  fc.fill();
+  // Eye shine
+  fc.fillStyle = '#fff';
+  fc.beginPath();
+  fc.arc(37, 38, 1.8, 0, Math.PI * 2);
+  fc.fill();
+  fc.beginPath();
+  fc.arc(69, 38, 1.8, 0, Math.PI * 2);
+  fc.fill();
+  // Nose
+  fc.strokeStyle = '#D4A574';
+  fc.lineWidth = 2;
+  fc.beginPath();
+  fc.moveTo(48, 42);
+  fc.quadraticCurveTo(44, 55, 46, 58);
+  fc.quadraticCurveTo(50, 61, 54, 58);
+  fc.stroke();
+  // Smile
+  fc.strokeStyle = '#C07050';
+  fc.lineWidth = 2.5;
+  fc.beginPath();
+  fc.arc(cx, 60, 16, 0.15, Math.PI - 0.15);
+  fc.stroke();
+  // Teeth hint
+  fc.fillStyle = '#fff';
+  fc.fillRect(42, 64, 16, 5);
+  fc.strokeStyle = '#C07050';
+  fc.lineWidth = 0.5;
+  fc.strokeRect(42, 64, 16, 5);
+  // Beard/stubble
+  fc.fillStyle = 'rgba(42,24,16,0.25)';
+  fc.beginPath();
+  fc.moveTo(22, 55);
+  fc.quadraticCurveTo(20, 70, 30, 82);
+  fc.quadraticCurveTo(50, 92, 70, 82);
+  fc.quadraticCurveTo(80, 70, 78, 55);
+  fc.quadraticCurveTo(50, 50, 22, 55);
+  fc.fill();
+  // Ears
+  fc.fillStyle = '#E8B888';
+  fc.beginPath();
+  fc.ellipse(10, 45, 7, 10, -0.2, 0, Math.PI * 2);
+  fc.fill();
+  fc.beginPath();
+  fc.ellipse(90, 45, 7, 10, 0.2, 0, Math.PI * 2);
+  fc.fill();
+}
+createDriverFace();
+
 // Responsive canvas
 function resize() {
   canvas.width = Math.min(window.innerWidth, 420);
@@ -109,90 +224,66 @@ window.addEventListener('resize', resize);
 // Game state
 let gameRunning = false;
 let score = 0;
+let highScore = parseInt(localStorage.getItem('boxsterHighScore') || '0');
 let speed = 3;
 let obstacles = [];
 let roadLines = [];
 let buildings = [];
 let frameCount = 0;
-let car = { x: 0, y: 0, w: 50, h: 90 };
+let car = { x: 0, y: 0, w: 80, h: 140 };
 let targetX = 0;
 let touchStartX = 0;
 let palmTrees = [];
+let particles = [];
 
-// Driver face (we'll draw a cartoon version)
-const driverFace = {
-  draw(x, y, size) {
-    // Head
-    ctx.fillStyle = '#F4C28B';
-    ctx.beginPath();
-    ctx.ellipse(x, y, size * 0.5, size * 0.6, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Hair
-    ctx.fillStyle = '#3A2010';
-    ctx.beginPath();
-    ctx.ellipse(x, y - size * 0.35, size * 0.5, size * 0.35, 0, Math.PI, Math.PI * 2);
-    ctx.fill();
-    // Sunglasses
-    ctx.fillStyle = '#111';
-    ctx.fillRect(x - size * 0.4, y - size * 0.15, size * 0.35, size * 0.2);
-    ctx.fillRect(x + size * 0.05, y - size * 0.15, size * 0.35, size * 0.2);
-    ctx.fillRect(x - size * 0.4, y - size * 0.1, size * 0.8, size * 0.04);
-    // Smile
-    ctx.strokeStyle = '#A0522D';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(x, y + size * 0.1, size * 0.2, 0.1, Math.PI - 0.1);
-    ctx.stroke();
-    // Beard stubble
-    ctx.fillStyle = 'rgba(60,30,10,0.2)';
-    ctx.beginPath();
-    ctx.ellipse(x, y + size * 0.25, size * 0.35, size * 0.25, 0, 0, Math.PI);
-    ctx.fill();
-  }
-};
-
-// Obstacle types
+// Obstacle types - with bigger sizes and distinct visuals
 const obstacleTypes = [
   {
     name: 'Lula',
     emoji: '🧔',
-    color: '#cc0000',
+    bgColor: '#cc0000',
+    borderColor: '#ff3333',
     label: 'LULA',
     deathMsg: 'Lula te pegou! "Companheiro, vem pro meu lado!" 🧔'
   },
   {
     name: 'Taxes',
     emoji: '💰',
-    color: '#228B22',
+    bgColor: '#1a6b1a',
+    borderColor: '#33cc33',
     label: 'IMPOSTO',
-    variants: ['IPVA', 'IR', 'ICMS', 'ISS', 'IPTU', 'IOF', 'PIS', 'COFINS'],
+    variants: ['IPVA', 'IR', 'ICMS', 'ISS', 'IPTU', 'IOF'],
     deathMsg: 'Os impostos te pegaram! Não tem como fugir do Leão! 🦁💰'
   },
   {
     name: 'Haddad',
     emoji: '👔',
-    color: '#cc3333',
+    bgColor: '#aa2222',
+    borderColor: '#ff6666',
     label: 'HADDAD',
     deathMsg: 'Haddad te parou! Nova taxa: respirar na Paulista! 👔'
   },
   {
     name: 'Bad Governance',
     emoji: '🏛️',
-    color: '#555555',
-    label: 'GESTÃO',
+    bgColor: '#444444',
+    borderColor: '#888888',
+    label: 'MÁ GESTÃO',
     deathMsg: 'A má gestão do país te alcançou! PIB caiu 📉'
   },
   {
     name: 'Sleep Deprivation',
     emoji: '😴',
-    color: '#6A0DAD',
+    bgColor: '#5B0D99',
+    borderColor: '#9933ff',
     label: 'SONO',
     deathMsg: 'Dormiu no volante! Deveria ter dormido mais cedo! 😴💤'
   },
   {
     name: 'Bad Forehand',
     emoji: '🎾',
-    color: '#CCCC00',
+    bgColor: '#999900',
+    borderColor: '#FFFF33',
     label: 'FOREHAND',
     deathMsg: 'Seu forehand ruim te derrubou! Bola na rede! 🎾😩'
   }
@@ -205,26 +296,27 @@ function initGame() {
   roadLines = [];
   buildings = [];
   palmTrees = [];
+  particles = [];
   frameCount = 0;
-  car.w = 50;
-  car.h = 90;
+  car.w = 80;
+  car.h = 140;
   car.x = canvas.width / 2 - car.w / 2;
-  car.y = canvas.height - car.h - 40;
+  car.y = canvas.height - car.h - 30;
   targetX = car.x;
 
   // Init road lines
-  for (let i = 0; i < 10; i++) {
-    roadLines.push({ y: i * 80 });
+  for (let i = 0; i < 12; i++) {
+    roadLines.push({ y: i * 70 });
   }
 
   // Init buildings
   for (let side = 0; side < 2; side++) {
     for (let i = 0; i < 8; i++) {
       buildings.push({
-        x: side === 0 ? -5 : canvas.width - 45,
-        y: i * 120 - 60,
-        w: 50,
-        h: 80 + Math.random() * 60,
+        x: side === 0 ? -5 : canvas.width - 40,
+        y: i * 110 - 60,
+        w: 45,
+        h: 70 + Math.random() * 60,
         color: `hsl(${Math.random()*60+15}, 40%, ${30+Math.random()*20}%)`,
         side: side
       });
@@ -232,19 +324,19 @@ function initGame() {
   }
 
   // Palm trees
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 5; i++) {
     palmTrees.push({
-      x: Math.random() > 0.5 ? 55 + Math.random() * 15 : canvas.width - 70 - Math.random() * 15,
-      y: i * 150 + Math.random() * 50
+      x: Math.random() > 0.5 ? 48 + Math.random() * 12 : canvas.width - 60 - Math.random() * 12,
+      y: i * 170 + Math.random() * 50
     });
   }
 }
 
 function spawnObstacle() {
-  const roadLeft = 60;
-  const roadRight = canvas.width - 60;
+  const roadLeft = 50;
+  const roadRight = canvas.width - 50;
   const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-  const size = 40 + Math.random() * 15;
+  const size = 60 + Math.random() * 10; // MUCH bigger obstacles
 
   let label = type.label;
   if (type.variants) {
@@ -253,43 +345,47 @@ function spawnObstacle() {
 
   obstacles.push({
     x: roadLeft + Math.random() * (roadRight - roadLeft - size),
-    y: -size,
+    y: -size - 20,
     w: size,
-    h: size,
-    speed: speed * (0.8 + Math.random() * 0.5),
+    h: size + 20, // taller to fit label
+    speed: speed * (0.7 + Math.random() * 0.4),
     type: type,
     label: label,
-    rotation: 0,
-    rotSpeed: (Math.random() - 0.5) * 0.05
+    wobble: 0,
+    wobbleSpeed: 0.03 + Math.random() * 0.03
   });
 }
 
 function drawRoad() {
   // Sky gradient
   const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.3);
-  skyGrad.addColorStop(0, '#1a1a2e');
-  skyGrad.addColorStop(1, '#16213e');
+  skyGrad.addColorStop(0, '#0a0a1e');
+  skyGrad.addColorStop(1, '#111133');
   ctx.fillStyle = skyGrad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Road
-  const roadLeft = 55;
-  const roadRight = canvas.width - 55;
-  ctx.fillStyle = '#333';
+  const roadLeft = 45;
+  const roadRight = canvas.width - 45;
+  const roadGrad = ctx.createLinearGradient(roadLeft, 0, roadRight, 0);
+  roadGrad.addColorStop(0, '#2a2a2a');
+  roadGrad.addColorStop(0.5, '#3a3a3a');
+  roadGrad.addColorStop(1, '#2a2a2a');
+  ctx.fillStyle = roadGrad;
   ctx.fillRect(roadLeft, 0, roadRight - roadLeft, canvas.height);
 
   // Sidewalks
-  ctx.fillStyle = '#666';
-  ctx.fillRect(roadLeft - 10, 0, 12, canvas.height);
-  ctx.fillRect(roadRight - 2, 0, 12, canvas.height);
+  ctx.fillStyle = '#5a5a5a';
+  ctx.fillRect(roadLeft - 8, 0, 10, canvas.height);
+  ctx.fillRect(roadRight - 2, 0, 10, canvas.height);
 
-  // Road lines
-  ctx.setLineDash([30, 30]);
+  // Center dashed line
+  ctx.setLineDash([35, 25]);
   ctx.strokeStyle = '#FFD700';
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 3;
   for (let line of roadLines) {
     line.y += speed;
-    if (line.y > canvas.height) line.y -= 800;
+    if (line.y > canvas.height) line.y -= 840;
   }
   const centerX = canvas.width / 2;
   ctx.beginPath();
@@ -299,32 +395,32 @@ function drawRoad() {
   ctx.setLineDash([]);
 
   // Road edge lines
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.moveTo(roadLeft + 2, 0);
-  ctx.lineTo(roadLeft + 2, canvas.height);
-  ctx.moveTo(roadRight - 2, 0);
-  ctx.lineTo(roadRight - 2, canvas.height);
+  ctx.moveTo(roadLeft + 1, 0);
+  ctx.lineTo(roadLeft + 1, canvas.height);
+  ctx.moveTo(roadRight - 1, 0);
+  ctx.lineTo(roadRight - 1, canvas.height);
   ctx.stroke();
 }
 
 function drawBuildings() {
   for (let b of buildings) {
-    b.y += speed * 0.5;
+    b.y += speed * 0.4;
     if (b.y > canvas.height + 50) {
-      b.y -= 960;
-      b.h = 80 + Math.random() * 60;
+      b.y -= 880;
+      b.h = 70 + Math.random() * 60;
       b.color = `hsl(${Math.random()*60+15}, 40%, ${30+Math.random()*20}%)`;
     }
     ctx.fillStyle = b.color;
     ctx.fillRect(b.x, b.y, b.w, b.h);
     // Windows
-    ctx.fillStyle = 'rgba(255,255,150,0.6)';
-    for (let wy = b.y + 8; wy < b.y + b.h - 8; wy += 18) {
-      for (let wx = b.x + 8; wx < b.x + b.w - 8; wx += 16) {
-        if (Math.random() > 0.3) {
-          ctx.fillRect(wx, wy, 8, 10);
+    ctx.fillStyle = 'rgba(255,255,150,0.5)';
+    for (let wy = b.y + 8; wy < b.y + b.h - 8; wy += 16) {
+      for (let wx = b.x + 6; wx < b.x + b.w - 6; wx += 14) {
+        if (Math.random() > 0.4) {
+          ctx.fillRect(wx, wy, 7, 8);
         }
       }
     }
@@ -332,17 +428,15 @@ function drawBuildings() {
 }
 
 function drawPalmTree(x, y) {
-  // Trunk
-  ctx.fillStyle = '#8B6914';
-  ctx.fillRect(x - 3, y, 6, 35);
-  // Leaves
-  ctx.fillStyle = '#228B22';
+  ctx.fillStyle = '#7B5B14';
+  ctx.fillRect(x - 3, y, 6, 30);
+  ctx.fillStyle = '#1a8a1a';
   for (let i = 0; i < 5; i++) {
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(i * Math.PI * 2 / 5 + frameCount * 0.005);
+    ctx.rotate(i * Math.PI * 2 / 5 + frameCount * 0.004);
     ctx.beginPath();
-    ctx.ellipse(12, 0, 18, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(14, 0, 16, 5, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -350,169 +444,322 @@ function drawPalmTree(x, y) {
 
 function drawPalmTrees() {
   for (let p of palmTrees) {
-    p.y += speed * 0.7;
+    p.y += speed * 0.6;
     if (p.y > canvas.height + 50) {
-      p.y -= 900;
-      p.x = Math.random() > 0.5 ? 55 + Math.random() * 15 : canvas.width - 70 - Math.random() * 15;
+      p.y -= 850;
+      p.x = Math.random() > 0.5 ? 48 + Math.random() * 12 : canvas.width - 60 - Math.random() * 12;
     }
     drawPalmTree(p.x, p.y);
   }
 }
 
-function drawCar() {
+function drawBoxster() {
   const x = car.x;
   const y = car.y;
   const w = car.w;
   const h = car.h;
 
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  // Big shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.beginPath();
-  ctx.ellipse(x + w/2 + 3, y + h - 5, w/2 + 5, 12, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + w/2 + 4, y + h + 2, w/2 + 8, 14, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Car body - Black Boxster 718
+  // ---- PORSCHE BOXSTER 718 (top-down view) ----
+
+  // Main body shape - elongated with curves
+  ctx.fillStyle = '#111111';
+  ctx.beginPath();
+  // Start at rear left
+  ctx.moveTo(x + 8, y + 15);
+  // Left side
+  ctx.quadraticCurveTo(x + 2, y + 30, x + 4, y + h * 0.4);
+  ctx.quadraticCurveTo(x + 2, y + h * 0.6, x + 4, y + h * 0.8);
+  ctx.quadraticCurveTo(x + 6, y + h - 8, x + 14, y + h - 2);
+  // Front
+  ctx.quadraticCurveTo(x + w/2, y + h + 4, x + w - 14, y + h - 2);
+  // Right side
+  ctx.quadraticCurveTo(x + w - 6, y + h - 8, x + w - 4, y + h * 0.8);
+  ctx.quadraticCurveTo(x + w - 2, y + h * 0.6, x + w - 4, y + h * 0.4);
+  ctx.quadraticCurveTo(x + w - 2, y + 30, x + w - 8, y + 15);
+  // Rear
+  ctx.quadraticCurveTo(x + w/2, y + 8, x + 8, y + 15);
+  ctx.fill();
+
+  // Body highlight
   ctx.fillStyle = '#1a1a1a';
   ctx.beginPath();
-  ctx.roundRect(x + 3, y + 15, w - 6, h - 20, 8);
+  ctx.ellipse(x + w/2, y + h * 0.55, w/2 - 8, h * 0.38, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Car front curve
+  // Rear engine cover (Boxster mid-engine)
+  ctx.fillStyle = '#0d0d0d';
   ctx.beginPath();
-  ctx.roundRect(x + 6, y + h - 25, w - 12, 20, [0, 0, 6, 6]);
+  ctx.roundRect(x + 12, y + 12, w - 24, 30, 8);
   ctx.fill();
+  // Engine vents
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x + 20 + i * 12, y + 18);
+    ctx.lineTo(x + 20 + i * 12, y + 36);
+    ctx.stroke();
+  }
 
-  // Car rear
-  ctx.fillStyle = '#111';
+  // Rear light bar (718 style)
+  ctx.fillStyle = '#ff1111';
+  ctx.shadowColor = '#ff0000';
+  ctx.shadowBlur = 12;
   ctx.beginPath();
-  ctx.roundRect(x + 5, y + 5, w - 10, 25, [8, 8, 0, 0]);
+  ctx.roundRect(x + 14, y + 10, w - 28, 5, 3);
   ctx.fill();
+  ctx.shadowBlur = 0;
 
   // Windshield
-  ctx.fillStyle = '#2a4a7a';
+  ctx.fillStyle = '#1a3355';
   ctx.beginPath();
-  ctx.roundRect(x + 8, y + 25, w - 16, 22, 4);
+  ctx.moveTo(x + 14, y + 44);
+  ctx.quadraticCurveTo(x + 12, y + 60, x + 14, y + 75);
+  ctx.lineTo(x + w - 14, y + 75);
+  ctx.quadraticCurveTo(x + w - 12, y + 60, x + w - 14, y + 44);
+  ctx.quadraticCurveTo(x + w/2, y + 40, x + 14, y + 44);
   ctx.fill();
 
-  // Driver face in car
-  driverFace.draw(x + w/2, y + 35, 18);
-
-  // Headlights
-  ctx.fillStyle = '#FFD700';
-  ctx.shadowColor = '#FFD700';
-  ctx.shadowBlur = 10;
-  ctx.beginPath();
-  ctx.ellipse(x + 10, y + h - 12, 4, 3, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(x + w - 10, y + h - 12, 4, 3, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
-
-  // Tail lights
-  ctx.fillStyle = '#ff0000';
-  ctx.shadowColor = '#ff0000';
-  ctx.shadowBlur = 8;
-  ctx.fillRect(x + 7, y + 8, 8, 4);
-  ctx.fillRect(x + w - 15, y + 8, 8, 4);
-  ctx.shadowBlur = 0;
-
-  // Porsche stripe detail
-  ctx.strokeStyle = '#333';
+  // Windshield reflection
+  ctx.strokeStyle = 'rgba(100,150,255,0.3)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(x + w/2, y + 50);
-  ctx.lineTo(x + w/2, y + h - 10);
+  ctx.moveTo(x + 20, y + 48);
+  ctx.quadraticCurveTo(x + 30, y + 56, x + 20, y + 68);
   ctx.stroke();
 
-  // Side mirrors
-  ctx.fillStyle = '#1a1a1a';
-  ctx.fillRect(x - 3, y + 28, 5, 6);
-  ctx.fillRect(x + w - 2, y + 28, 5, 6);
+  // DRIVER FACE - big and centered in windshield
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x + w/2, y + 58, 16, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.drawImage(faceCanvas, x + w/2 - 16, y + 58 - 16, 32, 32);
+  ctx.restore();
+  // Face border
+  ctx.strokeStyle = '#FFD700';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(x + w/2, y + 58, 16, 0, Math.PI * 2);
+  ctx.stroke();
 
-  // Wheels
-  ctx.fillStyle = '#222';
-  ctx.fillRect(x - 1, y + 18, 5, 14);
-  ctx.fillRect(x + w - 4, y + 18, 5, 14);
-  ctx.fillRect(x - 1, y + h - 25, 5, 14);
-  ctx.fillRect(x + w - 4, y + h - 25, 5, 14);
-  // Wheel rims
-  ctx.fillStyle = '#888';
-  ctx.fillRect(x, y + 21, 3, 8);
-  ctx.fillRect(x + w - 3, y + 21, 3, 8);
-  ctx.fillRect(x, y + h - 22, 3, 8);
-  ctx.fillRect(x + w - 3, y + h - 22, 3, 8);
+  // Hood / front section
+  ctx.fillStyle = '#0f0f0f';
+  ctx.beginPath();
+  ctx.moveTo(x + 12, y + 78);
+  ctx.lineTo(x + w - 12, y + 78);
+  ctx.quadraticCurveTo(x + w - 8, y + h * 0.85, x + w - 14, y + h - 8);
+  ctx.quadraticCurveTo(x + w/2, y + h + 2, x + 14, y + h - 8);
+  ctx.quadraticCurveTo(x + 8, y + h * 0.85, x + 12, y + 78);
+  ctx.fill();
+
+  // Hood center line (Porsche style)
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x + w/2, y + 80);
+  ctx.lineTo(x + w/2, y + h - 12);
+  ctx.stroke();
+
+  // Headlights (718 style - slim)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.shadowColor = '#FFFFFF';
+  ctx.shadowBlur = 15;
+  // Left headlight
+  ctx.beginPath();
+  ctx.ellipse(x + 18, y + h - 10, 8, 4, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // Right headlight
+  ctx.beginPath();
+  ctx.ellipse(x + w - 18, y + h - 10, 8, 4, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // DRL light strips
+  ctx.strokeStyle = '#FFD700';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#FFD700';
+  ctx.shadowBlur = 6;
+  ctx.beginPath();
+  ctx.arc(x + 18, y + h - 10, 10, -0.8, 0.8);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x + w - 18, y + h - 10, 10, Math.PI - 0.8, Math.PI + 0.8);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Side mirrors
+  ctx.fillStyle = '#111';
+  ctx.beginPath();
+  ctx.ellipse(x - 2, y + 52, 6, 4, -0.4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + w + 2, y + 52, 6, 4, 0.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Wheels (4 wheels visible from top)
+  const wheelW = 8, wheelH = 18;
+  ctx.fillStyle = '#1a1a1a';
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth = 1;
+  // Front left
+  ctx.fillRect(x - 3, y + h - 35, wheelW, wheelH);
+  ctx.strokeRect(x - 3, y + h - 35, wheelW, wheelH);
+  // Front right
+  ctx.fillRect(x + w - wheelW + 3, y + h - 35, wheelW, wheelH);
+  ctx.strokeRect(x + w - wheelW + 3, y + h - 35, wheelW, wheelH);
+  // Rear left
+  ctx.fillRect(x - 3, y + 18, wheelW, wheelH);
+  ctx.strokeRect(x - 3, y + 18, wheelW, wheelH);
+  // Rear right
+  ctx.fillRect(x + w - wheelW + 3, y + 18, wheelW, wheelH);
+  ctx.strokeRect(x + w - wheelW + 3, y + 18, wheelW, wheelH);
+
+  // Wheel rims (silver centers)
+  ctx.fillStyle = '#777';
+  ctx.fillRect(x - 1, y + h - 31, 4, 10);
+  ctx.fillRect(x + w - 3, y + h - 31, 4, 10);
+  ctx.fillRect(x - 1, y + 22, 4, 10);
+  ctx.fillRect(x + w - 3, y + 22, 4, 10);
+
+  // "PORSCHE" text on rear
+  ctx.fillStyle = '#666';
+  ctx.font = 'bold 7px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('PORSCHE', x + w/2, y + 9);
 }
 
 function drawObstacle(obs) {
+  const cx = obs.x + obs.w / 2;
+  const cy = obs.y + obs.w / 2; // center on the square part
+
+  // Wobble animation
+  obs.wobble += obs.wobbleSpeed;
+  const wobbleX = Math.sin(obs.wobble) * 2;
+
   ctx.save();
-  ctx.translate(obs.x + obs.w/2, obs.y + obs.h/2);
-  obs.rotation += obs.rotSpeed;
-  ctx.rotate(obs.rotation);
+  ctx.translate(wobbleX, 0);
 
-  // Background circle
-  ctx.fillStyle = obs.type.color;
-  ctx.globalAlpha = 0.85;
+  // Outer glow
+  ctx.shadowColor = obs.type.borderColor;
+  ctx.shadowBlur = 15;
+
+  // Background rounded rectangle
+  ctx.fillStyle = obs.type.bgColor;
   ctx.beginPath();
-  ctx.arc(0, 0, obs.w/2 + 4, 0, Math.PI * 2);
+  ctx.roundRect(obs.x - 2, obs.y - 2, obs.w + 4, obs.h + 4, 14);
   ctx.fill();
-  ctx.globalAlpha = 1;
 
-  // Emoji
-  ctx.font = `${obs.w * 0.65}px serif`;
+  // Border
+  ctx.strokeStyle = obs.type.borderColor;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(obs.x - 2, obs.y - 2, obs.w + 4, obs.h + 4, 14);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Big emoji
+  ctx.font = `${obs.w * 0.55}px serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(obs.type.emoji, 0, -2);
+  ctx.fillText(obs.type.emoji, cx, cy - 2);
 
-  // Label
-  ctx.font = `bold ${Math.max(8, obs.w * 0.22)}px Arial`;
-  ctx.fillStyle = '#fff';
-  ctx.fillText(obs.label, 0, obs.w/2 + 2);
+  // Label - BIG and BOLD with background
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  const labelY = obs.y + obs.w + 2;
+  ctx.fillRect(obs.x + 2, labelY, obs.w - 4, 18);
+
+  ctx.font = `bold ${Math.max(11, obs.w * 0.2)}px Arial`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(obs.label, cx, labelY + 9);
 
   ctx.restore();
 }
 
 function drawHUD() {
-  // Score
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillRect(10, 10, 120, 35);
-  ctx.fillStyle = '#FFD700';
-  ctx.font = 'bold 20px Arial';
-  ctx.textAlign = 'left';
-  ctx.fillText(`🏆 ${score}`, 20, 34);
-
-  // Speed indicator
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillRect(canvas.width - 100, 10, 90, 35);
-  ctx.fillStyle = '#00ff88';
-  ctx.font = 'bold 16px Arial';
-  ctx.textAlign = 'right';
-  ctx.fillText(`${Math.floor(speed * 30)} km/h`, canvas.width - 18, 33);
-
-  // Rio skyline silhouette at top
-  ctx.fillStyle = 'rgba(50,50,80,0.4)';
-  // Cristo Redentor silhouette
-  const cx = canvas.width * 0.7;
+  // Score panel
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
   ctx.beginPath();
-  ctx.moveTo(cx - 15, 50);
-  ctx.lineTo(cx - 3, 15);
-  ctx.lineTo(cx - 12, 15);
-  ctx.lineTo(cx - 12, 8);
-  ctx.lineTo(cx + 12, 8);
-  ctx.lineTo(cx + 12, 15);
-  ctx.lineTo(cx + 3, 15);
-  ctx.lineTo(cx + 15, 50);
+  ctx.roundRect(10, 8, 130, 40, 8);
+  ctx.fill();
+  ctx.fillStyle = '#FFD700';
+  ctx.font = 'bold 22px Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText(`🏆 ${score}`, 22, 35);
+
+  // Speed panel
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.beginPath();
+  ctx.roundRect(canvas.width - 110, 8, 100, 40, 8);
+  ctx.fill();
+  ctx.fillStyle = '#00ff88';
+  ctx.font = 'bold 18px Arial';
+  ctx.textAlign = 'right';
+  ctx.fillText(`${Math.floor(speed * 30)} km/h`, canvas.width - 18, 35);
+
+  // High score
+  if (highScore > 0) {
+    ctx.fillStyle = 'rgba(255,215,0,0.4)';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Best: ${highScore}`, 24, 58);
+  }
+
+  // Cristo Redentor silhouette
+  ctx.fillStyle = 'rgba(50,50,80,0.3)';
+  const cx = canvas.width * 0.72;
+  ctx.beginPath();
+  ctx.moveTo(cx - 18, 60);
+  ctx.lineTo(cx - 4, 18);
+  ctx.lineTo(cx - 15, 18);
+  ctx.lineTo(cx - 15, 10);
+  ctx.lineTo(cx + 15, 10);
+  ctx.lineTo(cx + 15, 18);
+  ctx.lineTo(cx + 4, 18);
+  ctx.lineTo(cx + 18, 60);
   ctx.fill();
 
-  // Sugarloaf mountain
+  // Sugarloaf
   ctx.beginPath();
-  ctx.moveTo(canvas.width * 0.2 - 30, 55);
-  ctx.quadraticCurveTo(canvas.width * 0.2, 10, canvas.width * 0.2 + 30, 55);
+  ctx.moveTo(canvas.width * 0.22 - 25, 62);
+  ctx.quadraticCurveTo(canvas.width * 0.22, 15, canvas.width * 0.22 + 25, 62);
   ctx.fill();
 }
 
+function spawnParticles(x, y) {
+  for (let i = 0; i < 8; i++) {
+    particles.push({
+      x: x, y: y,
+      vx: (Math.random() - 0.5) * 6,
+      vy: (Math.random() - 0.5) * 6,
+      life: 30,
+      color: '#FFD700'
+    });
+  }
+}
+
+function drawParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    ctx.globalAlpha = p.life / 30;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+  }
+  ctx.globalAlpha = 1;
+}
+
 function checkCollision(obs) {
-  const padding = 8;
+  const padding = 10;
   return car.x + padding < obs.x + obs.w &&
          car.x + car.w - padding > obs.x &&
          car.y + padding < obs.y + obs.h &&
@@ -521,6 +768,10 @@ function checkCollision(obs) {
 
 function gameOver(obs) {
   gameRunning = false;
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('boxsterHighScore', score.toString());
+  }
   document.getElementById('finalScore').textContent = score;
   document.getElementById('killedBy').innerHTML = obs.type.deathMsg;
   document.getElementById('gameOverScreen').style.display = 'flex';
@@ -534,22 +785,22 @@ function update() {
 
   // Increase difficulty
   if (frameCount % 500 === 0) {
-    speed += 0.3;
+    speed += 0.25;
   }
 
-  // Spawn obstacles
-  const spawnRate = Math.max(30, 80 - Math.floor(score / 200) * 5);
+  // Spawn obstacles - not too frequent so they're readable
+  const spawnRate = Math.max(40, 90 - Math.floor(score / 300) * 5);
   if (frameCount % spawnRate === 0) {
     spawnObstacle();
   }
 
-  // Move car toward target
+  // Move car toward target (smooth)
   const dx = targetX - car.x;
-  car.x += dx * 0.12;
+  car.x += dx * 0.15;
 
   // Clamp car to road
-  const roadLeft = 60;
-  const roadRight = canvas.width - 60 - car.w;
+  const roadLeft = 50;
+  const roadRight = canvas.width - 50 - car.w;
   car.x = Math.max(roadLeft, Math.min(roadRight, car.x));
 
   // Update obstacles
@@ -576,7 +827,8 @@ function draw() {
     drawObstacle(obs);
   }
 
-  drawCar();
+  drawBoxster();
+  drawParticles();
   drawHUD();
 }
 
@@ -586,13 +838,11 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-// Controls
-// Touch
+// Controls - Touch
 let isTouching = false;
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
   isTouching = true;
-  touchStartX = e.touches[0].clientX;
   const rect = canvas.getBoundingClientRect();
   const touchX = e.touches[0].clientX - rect.left;
   targetX = touchX - car.w / 2;
@@ -620,8 +870,8 @@ canvas.addEventListener('mousemove', (e) => {
 // Keyboard
 document.addEventListener('keydown', (e) => {
   if (!gameRunning) return;
-  if (e.key === 'ArrowLeft' || e.key === 'a') targetX = car.x - 30;
-  if (e.key === 'ArrowRight' || e.key === 'd') targetX = car.x + 30;
+  if (e.key === 'ArrowLeft' || e.key === 'a') targetX = car.x - 40;
+  if (e.key === 'ArrowRight' || e.key === 'd') targetX = car.x + 40;
 });
 
 // Start / Restart
