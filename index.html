@@ -69,13 +69,9 @@
   #obstacleList span { font-size: 18px; margin-right: 4px; }
   .hero-section {
     position: relative;
-    width: 280px;
-    height: 170px;
+    width: 320px;
+    height: 160px;
     margin: 0 auto 8px;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 2px solid #FFD700;
-    box-shadow: 0 0 25px rgba(255,215,0,0.25);
   }
   .hero-section canvas { width: 100%; height: 100%; }
   .intro-text {
@@ -113,14 +109,14 @@
   <h1>🏎️ BOXSTER ESCAPE 🏎️</h1>
   <h2>Rio de Janeiro Edition</h2>
   <div class="hero-section">
-    <canvas id="heroCanvas" width="560" height="340"></canvas>
+    <canvas id="heroCanvas" width="640" height="320"></canvas>
   </div>
   <p class="intro-text">Você é o Leleo. Sua missão: sobreviver à vida adulta no Brasil. Boa sorte, você vai precisar. 🇧🇷</p>
   <div id="obstacleList">
     <span>🧔</span> Lula<br>
-    <span>💰</span> Impostos (IPVA, IR, ICMS...)<br>
+    <span>💰</span> Impostos<br>
     <span>👔</span> Haddad<br>
-    <span>📏</span> Irmão Mais Alto<br>
+    <span>📏</span> Irmão Alto<br>
     <span>😴</span> Sono<br>
     <span>🎾</span> Forehand Ruim<br>
   </div>
@@ -151,332 +147,254 @@ faceSmallImg.src = FACE_SMALL_SRC;
 function drawHeroCanvas() {
   const hc = document.getElementById('heroCanvas');
   const hctx = hc.getContext('2d');
-  const W = 560, H = 340;
+  const W = 640, H = 320;
 
-  // Dashboard / cockpit view looking forward from driver seat
+  // ---- SIDE PROFILE BOXSTER 718 CUTOUT WITH DRIVER ----
+  // Clear with transparent
+  hctx.clearRect(0, 0, W, H);
 
-  // Sky through windshield
-  const skyGrad = hctx.createLinearGradient(0, 0, 0, H * 0.45);
-  skyGrad.addColorStop(0, '#0a0a2e');
-  skyGrad.addColorStop(0.5, '#141440');
-  skyGrad.addColorStop(1, '#1a1a50');
-  hctx.fillStyle = skyGrad;
-  hctx.fillRect(0, 0, W, H);
+  const cx = W / 2, groundY = H * 0.82;
 
-  // Stars
-  hctx.fillStyle = '#fff';
-  for (let i = 0; i < 40; i++) {
-    hctx.globalAlpha = 0.2 + Math.random() * 0.8;
-    hctx.beginPath();
-    hctx.arc(Math.random() * W, Math.random() * H * 0.3, 0.5 + Math.random() * 1.2, 0, Math.PI * 2);
-    hctx.fill();
-  }
-  hctx.globalAlpha = 1;
+  // Ground reflection
+  const refGrad = hctx.createLinearGradient(0, groundY, 0, H);
+  refGrad.addColorStop(0, 'rgba(30,30,30,0.5)');
+  refGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  hctx.fillStyle = refGrad;
+  hctx.fillRect(cx - 230, groundY, 460, H - groundY);
 
-  // Moon
-  hctx.fillStyle = '#ddd';
-  hctx.shadowColor = '#aaa';
-  hctx.shadowBlur = 20;
+  // ---- CAR BODY (side view, facing right) ----
+  const carX = cx - 210, carY = groundY - 105;
+
+  // Shadow under car
+  hctx.fillStyle = 'rgba(0,0,0,0.4)';
   hctx.beginPath();
-  hctx.arc(W * 0.8, 40, 18, 0, Math.PI * 2);
-  hctx.fill();
-  hctx.shadowBlur = 0;
-
-  // Cristo Redentor silhouette
-  hctx.fillStyle = '#222244';
-  hctx.beginPath();
-  hctx.moveTo(420, 110);
-  hctx.lineTo(438, 40);
-  hctx.lineTo(420, 40);
-  hctx.lineTo(420, 25);
-  hctx.lineTo(455, 25);
-  hctx.lineTo(455, 40);
-  hctx.lineTo(440, 40);
-  hctx.lineTo(458, 110);
+  hctx.ellipse(cx, groundY + 5, 200, 12, 0, 0, Math.PI * 2);
   hctx.fill();
 
-  // Sugarloaf
+  // Main body
+  hctx.fillStyle = '#0d0d0d';
   hctx.beginPath();
-  hctx.moveTo(100, 115);
-  hctx.quadraticCurveTo(140, 40, 180, 115);
+  // Bottom line
+  hctx.moveTo(carX + 40, carY + 100);
+  // Front bumper curve
+  hctx.quadraticCurveTo(carX + 10, carY + 95, carX + 5, carY + 80);
+  hctx.quadraticCurveTo(carX, carY + 65, carX + 8, carY + 50);
+  // Hood
+  hctx.quadraticCurveTo(carX + 20, carY + 35, carX + 60, carY + 28);
+  // Windshield base
+  hctx.lineTo(carX + 130, carY + 25);
+  // Windshield angle up
+  hctx.lineTo(carX + 155, carY + 5);
+  // Roof
+  hctx.quadraticCurveTo(carX + 200, carY - 5, carX + 260, carY + 2);
+  // Rear window
+  hctx.lineTo(carX + 310, carY + 20);
+  // Rear deck
+  hctx.quadraticCurveTo(carX + 360, carY + 25, carX + 395, carY + 35);
+  // Rear bumper
+  hctx.quadraticCurveTo(carX + 420, carY + 50, carX + 418, carY + 70);
+  hctx.quadraticCurveTo(carX + 415, carY + 90, carX + 400, carY + 100);
+  // Bottom
+  hctx.lineTo(carX + 40, carY + 100);
   hctx.fill();
 
-  // Mountain range
-  hctx.fillStyle = '#1a1a3a';
-  hctx.beginPath();
-  hctx.moveTo(0, 120);
-  hctx.lineTo(50, 90);
-  hctx.lineTo(120, 100);
-  hctx.lineTo(200, 80);
-  hctx.lineTo(280, 105);
-  hctx.lineTo(360, 85);
-  hctx.lineTo(440, 95);
-  hctx.lineTo(500, 75);
-  hctx.lineTo(W, 100);
-  hctx.lineTo(W, 120);
+  // Body metallic sheen
+  const sheen = hctx.createLinearGradient(0, carY, 0, carY + 100);
+  sheen.addColorStop(0, 'rgba(60,60,60,0.3)');
+  sheen.addColorStop(0.3, 'rgba(40,40,40,0.1)');
+  sheen.addColorStop(0.7, 'rgba(0,0,0,0)');
+  hctx.fillStyle = sheen;
   hctx.fill();
 
-  // Road ahead (perspective)
-  hctx.fillStyle = '#333';
-  hctx.beginPath();
-  hctx.moveTo(W * 0.3, 120);
-  hctx.lineTo(W * 0.7, 120);
-  hctx.lineTo(W * 0.85, H);
-  hctx.lineTo(W * 0.15, H);
-  hctx.fill();
-
-  // Road center line
-  hctx.setLineDash([12, 10]);
-  hctx.strokeStyle = '#FFD700';
-  hctx.lineWidth = 2;
-  hctx.beginPath();
-  hctx.moveTo(W * 0.5, 120);
-  hctx.lineTo(W * 0.5, H);
-  hctx.stroke();
-  hctx.setLineDash([]);
-
-  // Road edges
-  hctx.strokeStyle = '#fff';
-  hctx.lineWidth = 2;
-  hctx.beginPath();
-  hctx.moveTo(W * 0.3, 120);
-  hctx.lineTo(W * 0.15, H);
-  hctx.stroke();
-  hctx.beginPath();
-  hctx.moveTo(W * 0.7, 120);
-  hctx.lineTo(W * 0.85, H);
-  hctx.stroke();
-
-  // City lights in distance
-  for (let i = 0; i < 25; i++) {
-    hctx.fillStyle = `hsl(${40 + Math.random() * 20}, 100%, ${60 + Math.random() * 30}%)`;
-    hctx.globalAlpha = 0.3 + Math.random() * 0.5;
-    hctx.beginPath();
-    hctx.arc(W * 0.1 + Math.random() * W * 0.8, 108 + Math.random() * 12, 1 + Math.random() * 2, 0, Math.PI * 2);
-    hctx.fill();
-  }
-  hctx.globalAlpha = 1;
-
-  // ---- DASHBOARD / INTERIOR ----
-
-  // Dashboard base
-  const dashGrad = hctx.createLinearGradient(0, H * 0.6, 0, H);
-  dashGrad.addColorStop(0, '#1a1a1a');
-  dashGrad.addColorStop(1, '#0a0a0a');
-  hctx.fillStyle = dashGrad;
-  hctx.beginPath();
-  hctx.moveTo(0, H * 0.65);
-  hctx.quadraticCurveTo(W * 0.5, H * 0.55, W, H * 0.65);
-  hctx.lineTo(W, H);
-  hctx.lineTo(0, H);
-  hctx.fill();
-
-  // Dashboard leather texture hint
-  hctx.fillStyle = '#222';
-  hctx.beginPath();
-  hctx.moveTo(0, H * 0.68);
-  hctx.quadraticCurveTo(W * 0.5, H * 0.58, W, H * 0.68);
-  hctx.lineTo(W, H * 0.72);
-  hctx.quadraticCurveTo(W * 0.5, H * 0.62, 0, H * 0.72);
-  hctx.fill();
-
-  // Steering wheel
-  hctx.strokeStyle = '#333';
-  hctx.lineWidth = 14;
-  hctx.beginPath();
-  hctx.arc(W * 0.35, H * 0.82, 55, 0, Math.PI * 2);
-  hctx.stroke();
-
-  // Steering wheel inner
+  // Side character line
   hctx.strokeStyle = '#2a2a2a';
-  hctx.lineWidth = 10;
-  hctx.beginPath();
-  hctx.arc(W * 0.35, H * 0.82, 55, 0, Math.PI * 2);
-  hctx.stroke();
-
-  // Steering wheel grip highlights
-  hctx.strokeStyle = '#444';
-  hctx.lineWidth = 3;
-  hctx.beginPath();
-  hctx.arc(W * 0.35, H * 0.82, 55, -0.3, 0.8);
-  hctx.stroke();
-  hctx.beginPath();
-  hctx.arc(W * 0.35, H * 0.82, 55, Math.PI - 0.3, Math.PI + 0.8);
-  hctx.stroke();
-
-  // Porsche crest on steering wheel
-  hctx.fillStyle = '#FFD700';
-  hctx.font = 'bold 9px Arial';
-  hctx.textAlign = 'center';
-  hctx.fillText('PORSCHE', W * 0.35, H * 0.8);
-  // Shield shape
-  hctx.strokeStyle = '#FFD700';
   hctx.lineWidth = 1.5;
   hctx.beginPath();
-  hctx.roundRect(W * 0.35 - 18, H * 0.81, 36, 18, 4);
+  hctx.moveTo(carX + 25, carY + 60);
+  hctx.quadraticCurveTo(carX + 200, carY + 52, carX + 410, carY + 60);
   hctx.stroke();
 
-  // Steering wheel spokes
-  hctx.strokeStyle = '#333';
-  hctx.lineWidth = 8;
-  // Left spoke
-  hctx.beginPath();
-  hctx.moveTo(W * 0.35 - 40, H * 0.82);
-  hctx.lineTo(W * 0.35 - 20, H * 0.82);
-  hctx.stroke();
-  // Right spoke
-  hctx.beginPath();
-  hctx.moveTo(W * 0.35 + 40, H * 0.82);
-  hctx.lineTo(W * 0.35 + 20, H * 0.82);
-  hctx.stroke();
-  // Bottom spoke
-  hctx.beginPath();
-  hctx.moveTo(W * 0.35, H * 0.82 + 40);
-  hctx.lineTo(W * 0.35, H * 0.82 + 18);
-  hctx.stroke();
-
-  // Instrument cluster (speedometer)
-  hctx.fillStyle = '#111';
-  hctx.beginPath();
-  hctx.ellipse(W * 0.35, H * 0.6, 35, 20, 0, 0, Math.PI * 2);
-  hctx.fill();
-  hctx.strokeStyle = '#555';
-  hctx.lineWidth = 1.5;
-  hctx.stroke();
-  // Speed reading
-  hctx.fillStyle = '#00ff88';
-  hctx.font = 'bold 14px monospace';
-  hctx.fillText('200', W * 0.35, H * 0.6);
-  hctx.fillStyle = '#888';
-  hctx.font = '7px Arial';
-  hctx.fillText('km/h', W * 0.35, H * 0.6 + 10);
-
-  // RPM gauge
-  hctx.fillStyle = '#111';
-  hctx.beginPath();
-  hctx.ellipse(W * 0.22, H * 0.62, 22, 14, 0, 0, Math.PI * 2);
-  hctx.fill();
-  hctx.strokeStyle = '#555';
+  // Door line
+  hctx.strokeStyle = '#1a1a1a';
   hctx.lineWidth = 1;
+  hctx.beginPath();
+  hctx.moveTo(carX + 170, carY + 12);
+  hctx.lineTo(carX + 175, carY + 95);
   hctx.stroke();
-  hctx.fillStyle = '#ff4444';
-  hctx.font = 'bold 10px monospace';
-  hctx.fillText('7', W * 0.22, H * 0.62 + 3);
-  hctx.fillStyle = '#666';
-  hctx.font = '6px Arial';
-  hctx.fillText('RPM x1000', W * 0.22, H * 0.62 + 11);
 
-  // Center console / infotainment
-  hctx.fillStyle = '#1a1a1a';
+  // Side intake (718 style)
+  hctx.fillStyle = '#080808';
   hctx.beginPath();
-  hctx.roundRect(W * 0.55, H * 0.6, 90, 55, 6);
+  hctx.moveTo(carX + 180, carY + 58);
+  hctx.lineTo(carX + 280, carY + 55);
+  hctx.lineTo(carX + 285, carY + 75);
+  hctx.lineTo(carX + 178, carY + 78);
   hctx.fill();
-  hctx.strokeStyle = '#444';
-  hctx.lineWidth = 1;
-  hctx.stroke();
-  // Screen
-  hctx.fillStyle = '#0a1a2a';
-  hctx.beginPath();
-  hctx.roundRect(W * 0.56, H * 0.61, 88, 35, 4);
-  hctx.fill();
-  hctx.fillStyle = '#FFD700';
-  hctx.font = 'bold 10px Arial';
-  hctx.fillText('RIO → SP', W * 0.6 + 44, H * 0.63 + 12);
-  hctx.fillStyle = '#00ff88';
-  hctx.font = '8px Arial';
-  hctx.fillText('420 km', W * 0.6 + 44, H * 0.63 + 24);
-
-  // Gear shift
-  hctx.fillStyle = '#222';
-  hctx.beginPath();
-  hctx.roundRect(W * 0.58, H * 0.88, 28, 35, 5);
-  hctx.fill();
-  hctx.fillStyle = '#888';
-  hctx.beginPath();
-  hctx.arc(W * 0.58 + 14, H * 0.88 + 12, 8, 0, Math.PI * 2);
-  hctx.fill();
-  hctx.fillStyle = '#111';
-  hctx.font = 'bold 9px Arial';
-  hctx.fillText('6', W * 0.58 + 14, H * 0.88 + 15);
-
-  // AC vents
-  hctx.strokeStyle = '#444';
-  hctx.lineWidth = 1;
-  for (let v = 0; v < 3; v++) {
+  // Intake mesh lines
+  hctx.strokeStyle = '#222';
+  hctx.lineWidth = 0.8;
+  for (let i = 0; i < 8; i++) {
     hctx.beginPath();
-    hctx.roundRect(W * 0.56 + v * 32, H * 0.97, 25, 8, 3);
+    hctx.moveTo(carX + 185 + i * 12, carY + 58);
+    hctx.lineTo(carX + 183 + i * 12, carY + 78);
     hctx.stroke();
   }
 
-  // A-pillar (left)
-  hctx.fillStyle = '#1a1a1a';
+  // Windshield
+  hctx.fillStyle = '#1a3055';
   hctx.beginPath();
-  hctx.moveTo(0, 0);
-  hctx.lineTo(45, 0);
-  hctx.lineTo(25, H * 0.65);
-  hctx.lineTo(0, H * 0.65);
+  hctx.moveTo(carX + 132, carY + 25);
+  hctx.lineTo(carX + 157, carY + 5);
+  hctx.quadraticCurveTo(carX + 185, carY - 2, carX + 210, carY + 3);
+  hctx.lineTo(carX + 170, carY + 25);
   hctx.fill();
 
-  // A-pillar (right)
+  // Side window
+  hctx.fillStyle = '#152a45';
   hctx.beginPath();
-  hctx.moveTo(W, 0);
-  hctx.lineTo(W - 45, 0);
-  hctx.lineTo(W - 25, H * 0.65);
-  hctx.lineTo(W, H * 0.65);
+  hctx.moveTo(carX + 172, carY + 25);
+  hctx.lineTo(carX + 212, carY + 3);
+  hctx.quadraticCurveTo(carX + 255, carY - 3, carX + 290, carY + 10);
+  hctx.lineTo(carX + 295, carY + 25);
+  hctx.lineTo(carX + 172, carY + 25);
   hctx.fill();
 
-  // Windshield frame top
-  hctx.fillStyle = '#111';
-  hctx.fillRect(0, 0, W, 8);
-
-  // Rearview mirror
-  hctx.fillStyle = '#222';
-  hctx.beginPath();
-  hctx.roundRect(W * 0.38, 8, 80, 35, 6);
-  hctx.fill();
-  hctx.strokeStyle = '#555';
-  hctx.lineWidth = 1;
-  hctx.stroke();
-
-  // Face in rearview mirror
+  // DRIVER FACE visible through side window!
   if (faceLargeImg.complete) {
     hctx.save();
     hctx.beginPath();
-    hctx.roundRect(W * 0.39, 10, 78, 31, 4);
+    hctx.moveTo(carX + 178, carY + 25);
+    hctx.lineTo(carX + 215, carY + 4);
+    hctx.quadraticCurveTo(carX + 245, carY - 1, carX + 265, carY + 8);
+    hctx.lineTo(carX + 268, carY + 25);
+    hctx.closePath();
     hctx.clip();
-    // Mirror reflection - slightly blue tinted
-    hctx.drawImage(faceLargeImg, W * 0.39 - 5, 2, 88, 46);
-    // Blue overlay for mirror effect
-    hctx.fillStyle = 'rgba(30,40,80,0.25)';
-    hctx.fillRect(W * 0.39, 10, 78, 31);
+    hctx.drawImage(faceLargeImg, carX + 185, carY - 8, 80, 40);
+    // Glass tint
+    hctx.fillStyle = 'rgba(20,35,60,0.3)';
+    hctx.fillRect(carX + 170, carY - 10, 120, 40);
     hctx.restore();
   }
 
-  // Windshield reflections
-  hctx.strokeStyle = 'rgba(100,150,255,0.08)';
-  hctx.lineWidth = 1;
-  for (let i = 0; i < 6; i++) {
+  // Window chrome trim
+  hctx.strokeStyle = '#555';
+  hctx.lineWidth = 1.5;
+  hctx.beginPath();
+  hctx.moveTo(carX + 132, carY + 26);
+  hctx.lineTo(carX + 157, carY + 5);
+  hctx.quadraticCurveTo(carX + 255, carY - 5, carX + 295, carY + 12);
+  hctx.lineTo(carX + 298, carY + 26);
+  hctx.stroke();
+
+  // Headlight
+  hctx.fillStyle = '#fff';
+  hctx.shadowColor = '#FFD700';
+  hctx.shadowBlur = 15;
+  hctx.beginPath();
+  hctx.ellipse(carX + 12, carY + 60, 10, 18, 0.15, 0, Math.PI * 2);
+  hctx.fill();
+  // DRL
+  hctx.strokeStyle = '#FFD700';
+  hctx.lineWidth = 2;
+  hctx.beginPath();
+  hctx.arc(carX + 12, carY + 60, 13, -1.2, 1.2);
+  hctx.stroke();
+  hctx.shadowBlur = 0;
+
+  // Tail light
+  hctx.fillStyle = '#ff1111';
+  hctx.shadowColor = '#ff0000';
+  hctx.shadowBlur = 12;
+  hctx.beginPath();
+  hctx.ellipse(carX + 412, carY + 55, 6, 18, -0.1, 0, Math.PI * 2);
+  hctx.fill();
+  hctx.shadowBlur = 0;
+
+  // Front wheel
+  hctx.fillStyle = '#111';
+  hctx.beginPath();
+  hctx.arc(carX + 85, carY + 100, 30, 0, Math.PI * 2);
+  hctx.fill();
+  // Tire
+  hctx.strokeStyle = '#222';
+  hctx.lineWidth = 8;
+  hctx.stroke();
+  // Rim
+  hctx.fillStyle = '#666';
+  hctx.beginPath();
+  hctx.arc(carX + 85, carY + 100, 18, 0, Math.PI * 2);
+  hctx.fill();
+  // Porsche spokes
+  hctx.strokeStyle = '#444';
+  hctx.lineWidth = 3;
+  for (let i = 0; i < 5; i++) {
+    const angle = i * Math.PI * 2 / 5 - 0.3;
     hctx.beginPath();
-    hctx.moveTo(50 + i * 85, 10);
-    hctx.quadraticCurveTo(60 + i * 85, H * 0.35, 30 + i * 85, H * 0.65);
+    hctx.moveTo(carX + 85, carY + 100);
+    hctx.lineTo(carX + 85 + Math.cos(angle) * 16, carY + 100 + Math.sin(angle) * 16);
     hctx.stroke();
   }
-
-  // Left hand on wheel
-  hctx.fillStyle = '#E8B888';
+  // Center cap
+  hctx.fillStyle = '#888';
   hctx.beginPath();
-  hctx.ellipse(W * 0.35 - 48, H * 0.78, 10, 7, -0.5, 0, Math.PI * 2);
-  hctx.fill();
-  hctx.beginPath();
-  hctx.ellipse(W * 0.35 - 45, H * 0.75, 6, 4, -0.3, 0, Math.PI * 2);
+  hctx.arc(carX + 85, carY + 100, 5, 0, Math.PI * 2);
   hctx.fill();
 
-  // Right hand
+  // Rear wheel
+  hctx.fillStyle = '#111';
   hctx.beginPath();
-  hctx.ellipse(W * 0.35 + 48, H * 0.78, 10, 7, 0.5, 0, Math.PI * 2);
+  hctx.arc(carX + 345, carY + 100, 32, 0, Math.PI * 2);
   hctx.fill();
+  hctx.strokeStyle = '#222';
+  hctx.lineWidth = 9;
+  hctx.stroke();
+  hctx.fillStyle = '#666';
   hctx.beginPath();
-  hctx.ellipse(W * 0.35 + 45, H * 0.75, 6, 4, 0.3, 0, Math.PI * 2);
+  hctx.arc(carX + 345, carY + 100, 19, 0, Math.PI * 2);
+  hctx.fill();
+  hctx.strokeStyle = '#444';
+  hctx.lineWidth = 3;
+  for (let i = 0; i < 5; i++) {
+    const angle = i * Math.PI * 2 / 5 + 0.2;
+    hctx.beginPath();
+    hctx.moveTo(carX + 345, carY + 100);
+    hctx.lineTo(carX + 345 + Math.cos(angle) * 17, carY + 100 + Math.sin(angle) * 17);
+    hctx.stroke();
+  }
+  hctx.fillStyle = '#888';
+  hctx.beginPath();
+  hctx.arc(carX + 345, carY + 100, 5, 0, Math.PI * 2);
+  hctx.fill();
+
+  // Mirror
+  hctx.fillStyle = '#0d0d0d';
+  hctx.beginPath();
+  hctx.ellipse(carX + 142, carY + 22, 10, 6, 0.3, 0, Math.PI * 2);
+  hctx.fill();
+
+  // PORSCHE text on rear
+  hctx.fillStyle = '#888';
+  hctx.font = 'bold 8px Arial';
+  hctx.textAlign = 'center';
+  hctx.save();
+  hctx.translate(carX + 400, carY + 40);
+  hctx.rotate(0.15);
+  hctx.fillText('PORSCHE', 0, 0);
+  hctx.restore();
+
+  // 718 badge
+  hctx.fillStyle = '#FFD700';
+  hctx.font = 'bold 10px Arial';
+  hctx.textAlign = 'center';
+  hctx.fillText('718 BOXSTER', cx, groundY + 22);
+
+  // Light beam effect from headlight
+  hctx.fillStyle = 'rgba(255,215,0,0.04)';
+  hctx.beginPath();
+  hctx.moveTo(carX + 5, carY + 45);
+  hctx.lineTo(carX - 80, carY + 20);
+  hctx.lineTo(carX - 80, carY + 90);
+  hctx.lineTo(carX + 5, carY + 75);
   hctx.fill();
 }
 
@@ -712,8 +630,7 @@ const obstacleTypes = [
     emoji: '💰',
     bgColor: '#1a6b1a',
     borderColor: '#33cc33',
-    label: 'IMPOSTO',
-    variants: ['IPVA', 'IR', 'ICMS', 'ISS', 'IPTU', 'IOF'],
+    label: 'IMPOSTOS',
     deathMsg: 'Os impostos te pegaram! Não tem como fugir do Leão! 🦁💰'
   },
   {
@@ -729,8 +646,8 @@ const obstacleTypes = [
     emoji: '📏',
     bgColor: '#336699',
     borderColor: '#66aaff',
-    label: 'IRMÃO',
-    deathMsg: 'Seu irmão mais alto te alcançou! Não adianta correr! 📏😂'
+    label: 'IRMÃO ALTO',
+    deathMsg: 'Seu irmão alto te alcançou! Não adianta correr! 📏😂'
   },
   {
     name: 'Sleep Deprivation',
